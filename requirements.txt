@@ -1,0 +1,13 @@
+numpy==1.26.4
+pandas==2.2.2
+scikit-learn==1.5.0
+scipy==1.13.1
+shap==0.45.1
+matplotlib==3.8.4
+seaborn==0.13.2
+scapy==2.5.0
+Flask==3.0.3
+Flask-CORS==4.0.1
+joblib==1.4.2
+tqdm==4.66.4
+python-dateutil==2.9.0.post0

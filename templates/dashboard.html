@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Threat Detection Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: #333;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        header {
+            background: white;
+            padding: 20px 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        
+        h1 {
+            color: #1e3c72;
+            font-size: 28px;
+            margin-bottom: 5px;
+        }
+        
+        .subtitle {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .card h2 {
+            color: #1e3c72;
+            font-size: 18px;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 10px;
+        }
+        
+        .input-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #555;
+            font-size: 14px;
+        }
+        
+        textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            resize: vertical;
+            font-family: monospace;
+            min-height: 100px;
+        }
+        
+        button {
+            background: #1e3c72;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: background 0.3s;
+            width: 100%;
+        }
+        
+        button:hover {
+            background: #2a5298;
+        }
+        
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            display: none;
+        }
+        
+        .result.safe {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        
+        .result.threat {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        
+        .result.show {
+            display: block;
+        }
+        
+        .threat-badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            margin-left: 10px;
+        }
+        
+        .threat-badge.safe { background: #28a745; color: white; }
+        .threat-badge.low { background: #ffc107; color: #000; }
+        .threat-badge.medium { background: #ff9800; color: white; }
+        .threat-badge.high { background: #ff5722; color: white; }
+        .threat-badge.critical { background: #d32f2f; color: white; }
+        
+        .feature-list {
+            list-style: none;
+            margin-top: 15px;
+        }
+        
+        .feature-list li {
+            padding: 10px;
+            margin-bottom: 8px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            border-left: 4px solid #1e3c72;
+        }
+        
+        .feature-name {
+            font-weight: 600;
+            color: #1e3c72;
+        }
+        
+        .shap-value {
+            float: right;
+            font-family: monospace;
+            color: #666;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+            display: none;
+        }
+        
+        .loading.show {
+            display: block;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #1e3c72;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+        }
+        
+        .stat {
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: #1e3c72;
+        }
+        
+        .stat-label {
+            font-size: 14px;
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 5px;
+            border: 1px solid #f5c6cb;
+            margin-top: 15px;
+            display: none;
+        }
+        
+        .error-message.show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🛡️ AI-Powered Threat Detection System</h1>
+            <p class="subtitle">Real-time network security monitoring with explainable AI</p>
+        </header>
+        
+        <div class="grid">
+            <div class="card">
+                <h2>Single Flow Analysis</h2>
+                <div class="input-group">
+                    <label>Network Features (JSON):</label>
+                    <textarea id="singleInput" placeholder='{"Destination Port": 80, "Flow Duration": 120000, "Total Fwd Packets": 8, "Total Backward Packets": 7}'></textarea>
+                </div>
+                <button onclick="analyzeSingle()">Analyze Threat</button>
+                
+                <div id="singleError" class="error-message"></div>
+                
+                <div id="singleResult" class="result">
+                    <h3>Analysis Result</h3>
+                    <div id="singlePrediction"></div>
+                    <div id="singleExplanation"></div>
+                </div>
+                
+                <div id="singleLoading" class="loading">
+                    <div class="spinner"></div>
+                    <p>Analyzing...</p>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h2>Batch Analysis</h2>
+                <div class="input-group">
+                    <label>Multiple Flows (JSON Array):</label>
+                    <textarea id="batchInput" placeholder='[{"Destination Port": 80, ...}, {"Destination Port": 443, ...}]'></textarea>
+                </div>
+                <button onclick="analyzeBatch()">Analyze Batch</button>
+                
+                <div id="batchError" class="error-message"></div>
+                
+                <div id="batchResult" class="result">
+                    <h3>Batch Results</h3>
+                    <div class="stats">
+                        <div class="stat">
+                            <div class="stat-value" id="totalFlows">0</div>
+                            <div class="stat-label">Total Flows</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-value" id="threatsDetected">0</div>
+                            <div class="stat-label">Threats</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-value" id="threatPercent">0%</div>
+                            <div class="stat-label">Threat Rate</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="batchLoading" class="loading">
+                    <div class="spinner"></div>
+                    <p>Processing batch...</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h2>Example Network Features</h2>
+            <p style="margin-bottom: 15px;">Use these sample features for testing:</p>
+            <textarea readonly style="background: #f8f9fa; min-height: 150px;">
+{
+  "Destination Port": 80,
+  "Flow Duration": 120000,
+  "Total Fwd Packets": 8,
+  "Total Backward Packets": 7,
+  "Total Length of Fwd Packets": 480,
+  "Total Length of Bwd Packets": 420,
+  "Fwd Packet Length Max": 120,
+  "Fwd Packet Length Min": 60,
+  "Fwd Packet Length Mean": 60,
+  "Fwd Packet Length Std": 20,
+  "Bwd Packet Length Max": 100,
+  "Bwd Packet Length Min": 50,
+  "Bwd Packet Length Mean": 60,
+  "Bwd Packet Length Std": 15,
+  "Flow Bytes/s": 7500,
+  "Flow Packets/s": 125,
+  "Flow IAT Mean": 8571,
+  "Flow IAT Std": 5000,
+  "Flow IAT Max": 20000,
+  "Flow IAT Min": 1000,
+  "Fwd IAT Mean": 10000,
+  "Fwd IAT Std": 6000,
+  "Fwd IAT Max": 25000,
+  "Fwd IAT Min": 1500,
+  "Bwd IAT Mean": 7000,
+  "Bwd IAT Std": 5500,
+  "Bwd IAT Max": 22000,
+  "Bwd IAT Min": 1200,
+  "PSH Flag Count": 2,
+  "SYN Flag Count": 1,
+  "FIN Flag Count": 1,
+  "ACK Flag Count": 15,
+  "Average Packet Size": 60,
+  "Fwd Avg Bytes/Bulk": 60,
+  "Bwd Avg Bytes/Bulk": 60,
+  "Protocol": 6
+}
+            </textarea>
+        </div>
+    </div>
+    
+    <script>
+        // Helper function to show error messages
+        function showError(elementId, message) {
+            const errorDiv = document.getElementById(elementId);
+            errorDiv.textContent = '❌ Error: ' + message;
+            errorDiv.classList.add('show');
+            setTimeout(() => {
+                errorDiv.classList.remove('show');
+            }, 5000);
+        }
+        
+        async function analyzeSingle() {
+            const input = document.getElementById('singleInput').value.trim();
+            const resultDiv = document.getElementById('singleResult');
+            const loadingDiv = document.getElementById('singleLoading');
+            const predDiv = document.getElementById('singlePrediction');
+            const explainDiv = document.getElementById('singleExplanation');
+            const errorDiv = document.getElementById('singleError');
+            
+            // Hide previous results and errors
+            resultDiv.classList.remove('show');
+            errorDiv.classList.remove('show');
+            
+            // Validate input
+            if (!input) {
+                showError('singleError', 'Please enter network features in JSON format');
+                return;
+            }
+            
+            let features;
+            try {
+                features = JSON.parse(input);
+            } catch (e) {
+                showError('singleError', 'Invalid JSON format. Please check your input.');
+                return;
+            }
+            
+            // Show loading
+            loadingDiv.classList.add('show');
+            
+            try {
+                const response = await fetch('/api/predict', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({features: features})
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Server error: ' + response.status);
+                }
+                
+                const data = await response.json();
+                
+                // Check if we got an error from the API
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+                
+                // Validate required fields
+                if (!data.prediction || typeof data.confidence === 'undefined' || !data.threat_level) {
+                    throw new Error('Invalid response format from server');
+                }
+                
+                // Display result
+                const threatClass = data.is_threat ? 'threat' : 'safe';
+                resultDiv.className = `result ${threatClass} show`;
+                
+                // Safely get threat level with fallback
+                const threatLevel = (data.threat_level || 'UNKNOWN').toUpperCase();
+                const threatLevelClass = threatLevel.toLowerCase();
+                
+                predDiv.innerHTML = `
+                    <strong>Prediction:</strong> ${data.prediction}
+                    <span class="threat-badge ${threatLevelClass}">${threatLevel}</span>
+                    <br><strong>Confidence:</strong> ${(data.confidence * 100).toFixed(2)}%
+                `;
+                
+                // Display top features if available
+                if (data.top_features && data.top_features.length > 0) {
+                    let featureHTML = '<h4 style="margin-top: 15px;">Top Contributing Features:</h4><ul class="feature-list">';
+                    data.top_features.forEach(f => {
+                        featureHTML += `
+                            <li>
+                                <span class="feature-name">${f.feature || 'Unknown'}</span>
+                                <span class="shap-value">${(f.shap_value || 0).toFixed(4)}</span>
+                                <br><small>Value: ${(f.value || 0).toFixed(4)} - ${f.impact || 'No impact info'}</small>
+                            </li>
+                        `;
+                    });
+                    featureHTML += '</ul>';
+                    explainDiv.innerHTML = featureHTML;
+                } else {
+                    explainDiv.innerHTML = '<p style="margin-top: 15px;">No feature explanation available.</p>';
+                }
+                
+            } catch (error) {
+                console.error('Prediction error:', error);
+                showError('singleError', error.message || 'Failed to analyze. Please try again.');
+            } finally {
+                loadingDiv.classList.remove('show');
+            }
+        }
+        
+        async function analyzeBatch() {
+            const input = document.getElementById('batchInput').value.trim();
+            const resultDiv = document.getElementById('batchResult');
+            const loadingDiv = document.getElementById('batchLoading');
+            const errorDiv = document.getElementById('batchError');
+            
+            // Hide previous results and errors
+            resultDiv.classList.remove('show');
+            errorDiv.classList.remove('show');
+            
+            // Validate input
+            if (!input) {
+                showError('batchError', 'Please enter an array of network flows in JSON format');
+                return;
+            }
+            
+            let data;
+            try {
+                data = JSON.parse(input);
+            } catch (e) {
+                showError('batchError', 'Invalid JSON format. Please check your input.');
+                return;
+            }
+            
+            if (!Array.isArray(data)) {
+                showError('batchError', 'Input must be a JSON array of flow objects');
+                return;
+            }
+            
+            // Show loading
+            loadingDiv.classList.add('show');
+            
+            try {
+                const response = await fetch('/api/batch_predict', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({data: data})
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Server error: ' + response.status);
+                }
+                
+                const result = await response.json();
+                
+                // Check if we got an error from the API
+                if (result.error) {
+                    throw new Error(result.error);
+                }
+                
+                // Validate required fields
+                if (typeof result.total_flows === 'undefined' || 
+                    typeof result.threats_detected === 'undefined' || 
+                    typeof result.threat_percentage === 'undefined') {
+                    throw new Error('Invalid response format from server');
+                }
+                
+                // Update stats
+                document.getElementById('totalFlows').textContent = result.total_flows || 0;
+                document.getElementById('threatsDetected').textContent = result.threats_detected || 0;
+                document.getElementById('threatPercent').textContent = 
+                    (result.threat_percentage || 0).toFixed(1) + '%';
+                
+                resultDiv.classList.add('show');
+                
+            } catch (error) {
+                console.error('Batch prediction error:', error);
+                showError('batchError', error.message || 'Failed to analyze batch. Please try again.');
+            } finally {
+                loadingDiv.classList.remove('show');
+            }
+        }
+    </script>
+</body>
+</html>

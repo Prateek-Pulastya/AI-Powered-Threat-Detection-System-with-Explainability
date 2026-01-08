@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Threat Detection - Project Architecture</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 32px;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 40px;
+            font-size: 18px;
+        }
+        
+        .architecture {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        
+        .layer {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 25px;
+            border-left: 5px solid #667eea;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .layer:hover {
+            transform: translateX(5px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+        
+        .layer-title {
+            font-size: 22px;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .layer-icon {
+            font-size: 28px;
+        }
+        
+        .components {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .component {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border: 2px solid #e0e0e0;
+            transition: all 0.3s;
+        }
+        
+        .component:hover {
+            border-color: #667eea;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .component-name {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 8px;
+            font-size: 16px;
+        }
+        
+        .component-desc {
+            font-size: 14px;
+            color: #666;
+            line-height: 1.5;
+        }
+        
+        .flow-arrow {
+            text-align: center;
+            font-size: 40px;
+            color: #667eea;
+            margin: 10px 0;
+        }
+        
+        .file-structure {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 25px;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            margin-top: 30px;
+            overflow-x: auto;
+        }
+        
+        .file-structure h3 {
+            color: #90cdf4;
+            margin-bottom: 15px;
+            font-size: 20px;
+        }
+        
+        .file-tree {
+            line-height: 1.8;
+        }
+        
+        .folder {
+            color: #fbd38d;
+            font-weight: bold;
+        }
+        
+        .file {
+            color: #68d391;
+        }
+        
+        .description {
+            color: #a0aec0;
+            font-style: italic;
+        }
+        
+        .data-flow {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 10px;
+            margin-top: 30px;
+        }
+        
+        .data-flow h3 {
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+        
+        .flow-steps {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .flow-step {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 20px;
+            border-radius: 8px;
+            flex: 1;
+            min-width: 200px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+        }
+        
+        .flow-step-number {
+            font-size: 32px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .flow-step-title {
+            font-weight: bold;
+            margin-bottom: 8px;
+            font-size: 16px;
+        }
+        
+        .flow-step-desc {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        
+        .legend {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 30px;
+            padding: 20px;
+            background: #f7fafc;
+            border-radius: 10px;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .legend-color {
+            width: 30px;
+            height: 30px;
+            border-radius: 5px;
+        }
+        
+        .color-data {
+            background: #fbd38d;
+        }
+        
+        .color-process {
+            background: #68d391;
+        }
+        
+        .color-model {
+            background: #667eea;
+        }
+        
+        .color-output {
+            background: #f687b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🛡️ AI Threat Detection System</h1>
+        <p class="subtitle">Complete Visual Architecture & Data Flow</p>
+        
+        <!-- Main Architecture -->
+        <div class="architecture">
+            <!-- Layer 1: Data Input -->
+            <div class="layer">
+                <div class="layer-title">
+                    <span class="layer-icon">📥</span>
+                    Layer 1: Data Input & Collection
+                </div>
+                <div class="components">
+                    <div class="component">
+                        <div class="component-name">CICIDS2017 Dataset</div>
+                        <div class="component-desc">2.8M network flow records in CSV format containing labeled attack traffic</div>
+                    </div>
+                    <div class="component">
+                        <div class="component-name">Wireshark PCAP Files</div>
+                        <div class="component-desc">Raw packet captures that can be parsed into features</div>
+                    </div>
+                    <div class="component">
+                        <div class="component-name">Sample Data Generator</div>
+                        <div class="component-desc">Creates synthetic data for testing (generate_sample_data.py)</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="flow-arrow">↓</div>
+            
+            <!-- Layer 2: Data Processing -->
+            <div class="layer">
+                <div class="layer-title">
+                    <span class="layer-icon">⚙️</span>
+                    Layer 2: Data Preprocessing & Feature Engineering
+                </div>
+                <div class="components">
+                    <div class="component">
+                        <div class="component-name">Data Cleaning</div>
+                        <div class="component-desc">Remove NaN, infinity values, duplicates. Handle missing data.</div>
+                    </div>
+                    <div class="component">
+                        <div class="component-name">Feature Extraction</div>
+                        <div class="component-desc">Extract 80+ features: flow stats, packet sizes, timing, flags</div>
+                    </div>
+                    <div class="component">
+                        <div class="component-name">Label Encoding</div>
+                        <div class="component-desc">Convert text labels (BENIGN, DDoS) to numbers (0, 1, 2...)</div>
+                    </div>
+                    <div class="component">
+                        <div class="component-name">Feature Scaling</div>
+                        <div class="component-desc">Normalize features using StandardScaler (mean=0, std=1)</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="flow-arrow">↓</div>
+            
+            <!-- Layer 3: Model Training -->
+            <div class="layer">
+                <div class="layer-title">
+                    <span class="layer-icon">🧠</span>
+                    Layer 3: Machine Learning Model
+                </div>
+                <div class="components">
+                    <div class="component">
+                        <div class="component-name">Random Forest Classifier</div>
+                        <div class="component-desc">Ensemble of 100 decision trees voting on predictions</div>
+                    </div>
+                    <div class="component">
+                        <div class="component-name">Training Process</div>
+                        <div class="component-desc">70% data for training, 30% for testing. 100 iterations.</div>
+                    </div>
+                    <div class="component">
+                        <div class="component-name">Model Evaluation</div>
+                        <div class="component-desc">Calculate accuracy, precision, recall, F1-score, confusion matrix</div>
+                    </div>
+                    <div class="component">
+                        <div class="component-name">Model Serialization</div>
+                        <div class="component-desc">Save trained model as threat_detector.pkl (pickle file)</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="flow-arrow">↓</div>
+            
+            <!-- Layer 4: Explainability -->
+            <div class="layer">
+                <div class="layer-title">
+                    <span class="layer-icon">🔍</span>
+                    Layer 4: Explainability (SHAP)
+                </div>
+                <div class="components">
+                    <div class="component">
+                        <div class="component-name">SHAP TreeExplainer</div>
+                        <div class="component-desc">Calculates how much each feature contributed to the prediction</div>
+                    </div>
+                    <div class="component">
+                        <div class="component-name">Waterfall Plots</div>
+                        <div class="component-desc">Visual showing features pushing prediction up or down</div>
+                    </div>
+                    <div class="component">
+                        <div class="component-name">Summary Plots</div>
+                        <div class="component-desc">Global view of feature importance across all predictions</div>
+                    </div>
+                    <div class="component">
+                        <div class="component-name">Feature Contributions</div>
+                        <div class="component-desc">Ranked list of top factors for each prediction</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="flow-arrow">↓</div>
+            
+            <!-- Layer 5: Application Layer -->
+            <div class="layer">
+                <div class="layer-title">
+                    <span class="layer-icon">🌐</span>
+                    Layer 5: Web Application & API
+                </div>
+                <div class="components">
+                    <div class="component">
+                        <div class="component-name">Flask Server</div>
+                        <div class="component-desc">Web server running on http://localhost:5000</div>
+                    </div>
+                    <div class="component">
+                        <div class="component-name">REST API Endpoints</div>
+                        <div class="component-desc">/api/predict, /api/batch_predict for programmatic access</div>
+                    </div>
+                    <div class="component">
+                        <div class="component-name">Web Dashboard</div>
+                        <div class="component-desc">HTML interface for SOC analysts to interact with system</div>
+                    </div>
+                    <div class="component">
+                        <div class="component-name">Real-time Inference</div>
+                        <div class="component-desc">Process network flow → Get prediction in 5ms</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="flow-arrow">↓</div>
+            
+            <!-- Layer 6: Output -->
+            <div class="layer">
+                <div class="layer-title">
+                    <span class="layer-icon">📊</span>
+                    Layer 6: Results & Visualizations
+                </div>
+                <div class="components">
+                    <div class="component">
+                        <div class="component-name">Threat Predictions</div>
+                        <div class="component-desc">Label (BENIGN/DDoS/etc), confidence score, threat level</div>
+                    </div>
+                    <div class="component">
+                        <div class="component-name">Visual Explanations</div>
+                        <div class="component-desc">PNG charts showing confusion matrix, SHAP plots, feature importance</div>
+                    </div>
+                    <div class="component">
+                        <div class="component-name">JSON Responses</div>
+                        <div class="component-desc">Structured data for SIEM integration and automation</div>
+                    </div>
+                    <div class="component">
+                        <div class="component-name">SOC Alerts</div>
+                        <div class="component-desc">Actionable threat information with explanations</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- File Structure -->
+        <div class="file-structure">
+            <h3>📁 Complete File Structure</h3>
+            <div class="file-tree">
+threat-detection-ai/
+├── <span class="folder">data/</span>                           <span class="description">← All datasets stored here</span>
+│   ├── <span class="folder">raw/</span>                        <span class="description">← Original CSV/PCAP files</span>
+│   │   ├── <span class="file">Friday-WorkingHours-Afternoon-DDos.pcap_ISCX.csv</span>  <span class="description">← Main dataset</span>
+│   │   └── <span class="file">sample_data.csv</span>          <span class="description">← Generated test data</span>
+│   ├── <span class="folder">processed/</span>                  <span class="description">← Cleaned data (optional)</span>
+│   └── <span class="folder">models/</span>                     <span class="description">← Model checkpoints</span>
+│
+├── <span class="folder">src/</span>                            <span class="description">← All Python code here</span>
+│   ├── <span class="file">__init__.py</span>                  <span class="description">← Makes this a Python package</span>
+│   ├── <span class="file">threat_detector.py</span>           <span class="description">← MAIN: Training & detection logic</span>
+│   ├── <span class="file">dashboard.py</span>                 <span class="description">← Flask web server</span>
+│   ├── <span class="file">data_preprocessing.py</span>        <span class="description">← PCAP parsing utilities</span>
+│   └── <span class="file">generate_sample_data.py</span>      <span class="description">← Create test data</span>
+│
+├── <span class="folder">templates/</span>                      <span class="description">← HTML files for web interface</span>
+│   └── <span class="file">dashboard.html</span>               <span class="description">← Main web interface</span>
+│
+├── <span class="folder">outputs/</span>                        <span class="description">← Generated visualizations</span>
+│   ├── <span class="file">confusion_matrix.png</span>         <span class="description">← Model accuracy visualization</span>
+│   ├── <span class="file">feature_importance.png</span>       <span class="description">← Top features chart</span>
+│   ├── <span class="file">shap_summary.png</span>             <span class="description">← Global explanations</span>
+│   └── <span class="file">explanation_sample_*.png</span>     <span class="description">← Individual predictions</span>
+│
+├── <span class="folder">venv/</span>                           <span class="description">← Virtual environment (Python packages)</span>
+│
+├── <span class="file">threat_detector.pkl</span>              <span class="description">← SAVED MODEL (trained, ready to use)</span>
+├── <span class="file">requirements.txt</span>                 <span class="description">← List of required packages</span>
+├── <span class="file">test_prediction.py</span>               <span class="description">← Test script</span>
+└── <span class="file">.gitignore</span>                       <span class="description">← Files to ignore in Git</span>
+            </div>
+        </div>
+        
+        <!-- Data Flow -->
+        <div class="data-flow">
+            <h3>🔄 Complete Data Flow: From CSV to Threat Alert</h3>
+            <div class="flow-steps">
+                <div class="flow-step">
+                    <div class="flow-step-number">1️⃣</div>
+                    <div class="flow-step-title">Load CSV</div>
+                    <div class="flow-step-desc">Read network traffic data from file</div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">2️⃣</div>
+                    <div class="flow-step-title">Clean Data</div>
+                    <div class="flow-step-desc">Remove errors, handle missing values</div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">3️⃣</div>
+                    <div class="flow-step-title">Extract Features</div>
+                    <div class="flow-step-desc">Calculate 80+ network statistics</div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">4️⃣</div>
+                    <div class="flow-step-title">Train Model</div>
+                    <div class="flow-step-desc">Random Forest learns patterns</div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">5️⃣</div>
+                    <div class="flow-step-title">Make Prediction</div>
+                    <div class="flow-step-desc">Classify as BENIGN or threat</div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">6️⃣</div>
+                    <div class="flow-step-title">Explain with SHAP</div>
+                    <div class="flow-step-desc">Show WHY it made that decision</div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">7️⃣</div>
+                    <div class="flow-step-title">Display Result</div>
+                    <div class="flow-step-desc">Show on dashboard with charts</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Legend -->
+        <div class="legend">
+            <div class="legend-item">
+                <div class="legend-color color-data"></div>
+                <div>Data Files (CSV, PCAP)</div>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color color-process"></div>
+                <div>Processing Scripts (.py)</div>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color color-model"></div>
+                <div>ML Model (.pkl)</div>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color color-output"></div>
+                <div>Output Files (.png, .html)</div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
